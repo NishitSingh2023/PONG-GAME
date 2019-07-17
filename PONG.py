@@ -70,3 +70,21 @@ def write_score():
     score.write(score_R, align="center", font=("Arial", 32, "bold"))
 
 write_score()
+
+screen.tracer()
+
+def frame():
+    check_if_someone_scores()
+    update_paddle_positions()
+    update_ball_postion()
+    screen.update()
+    screen.ontimer(frame, framerate_ms)
+
+# Start the game
+framerate_ms = 40
+frame()
+
+# ball_movement speed
+ball_speed_xaxis = 3
+ball_speed_xaxis = 2
+
