@@ -1,4 +1,5 @@
 from turtle import Turtle, Screen, Shape
+from random import randint
 
 # Making Screen
 screen = Screen()
@@ -76,7 +77,7 @@ screen.tracer()
 def frame():
     check_if_someone_scores()
     update_paddle_positions()
-    update_ball_postion()
+    update_ball_position()
     screen.update()
     screen.ontimer(frame, framerate_ms)
 
@@ -85,6 +86,49 @@ framerate_ms = 40
 frame()
 
 # ball_movement speed
-ball_speed_xaxis = 3
-ball_speed_xaxis = 2
+ball_move_xaxis = 3     #speed of ball in horizontally
+ball_move_yaxis = 2     #speed of ball in vertically
 
+def update_ball_position():
+    global ball_move_xaxis, ball_move_yaxis
+
+    if ball.ycor()+ball_radius >= play_top:
+        ball_move_yaxis *= -1
+    if ball.ycor()-ball_radius <= play_bottom:
+        ball_move_yaxis *= -1
+
+    ball.setx(ball.xcor() + ball_move_xaxis)
+    ball.sety(ball.ycor() + ball_move_xaxis)
+
+def reset_ball():
+    global ball_move_xaxis, ball_move_yaxis
+
+    ball.setpos(0, 0)
+
+    speed_horiz = randint(2, 4)
+    speed_vert = randint(2, 4)
+
+    direction_horiz = 1
+    direction_vert = 1
+
+    if randint(0, 100) > 50:  # 50% chance of going left instead of right
+        direction_horiz = -1
+    if randint(0, 100) > 50:  # 50% chance of going down instead of up
+        direction_vert = -1
+
+    ball_move_xaxis = direction_horiz * speed_horiz
+    ball_move_yaxis = direction_vert * speed_vert
+
+def check_if_someone_scores():
+    global score_L, score_R
+    if ball.xcor()+ball_radius > play_right:
+        score_L += 1
+        write_score()
+        reset_ball()
+    if ball.xcor()+ball_radius > play_left:
+        score_R += 1
+        write_score()
+        reset_ball()
+
+def update_paddle_positions():
+    pass
