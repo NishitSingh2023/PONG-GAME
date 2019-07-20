@@ -4,6 +4,7 @@ from random import randint
 # Making Screen
 screen = Screen()
 screen.setup(600, 400)
+screen.tracer(0)
 
 # Playing Field Boundaries
 play_top = screen.window_height() / 2 - 100
@@ -15,7 +16,6 @@ play_right = screen.window_height() / 2 - 50
 area = Turtle()
 area.hideturtle()
 
-area.pensize(10)
 area.penup()
 area.goto(play_left, play_top)
 area.pendown()
@@ -24,14 +24,6 @@ area.goto(play_right, play_bottom)
 area.goto(play_left, play_bottom)
 area.goto(play_left, play_top)
 
-# BALL
-ball = Turtle()
-
-ball.penup()
-ball.shape("circle")
-ball.shapesize(0.5, 0.5)
-
-ball_radius = 10 * 0.5
 
 # Paddles
 L = Turtle()
@@ -52,8 +44,74 @@ screen.register_shape("paddle", paddle_shape)
 L.shape("paddle")
 R.shape("paddle")
 
+# move them into postion
 L.setx(play_left + 10)
 R.setx(play_right - 10)
+
+# Paddle movement
+paddle_L_move_direction = 0
+paddle_R_move_direction = 0
+
+paddle_move_vert = 4
+
+
+'''def paddle_is_allowed_to_move_here(new_y_pos):
+    if play_bottom > new_y_pos - paddle_h_half:
+        return False
+    if new_y_pos + paddle_h_half > play_top:
+        return False
+    return True
+'''
+
+def update_paddle_positions():
+    L_new_y_pos = L.ycor() + (paddle_L_move_direction * paddle_move_vert)
+    R_new_y_pos = R.ycor() + (paddle_R_move_direction * paddle_move_vert)
+    #if paddle_is_allowed_to_move_here(L_new_y_pos):
+        L.sety(L_new_y_pos)
+    #if paddle_is_allowed_to_move_here(R_new_y_pos):
+        R.sety(R_new_y_pos)
+
+
+def L_up():
+    global paddle_L_move_direction
+    paddle_L_move_direction = 1
+
+
+def L_down():
+    global paddle_L_move_direction
+    paddle_L_move_direction = -1
+
+
+def R_up():
+    global paddle_R_move_direction
+    paddle_R_move_direction = 1
+
+
+def R_down():
+    global paddle_R_move_direction
+    paddle_R_move_direction = -1
+
+
+def L_off():
+    global paddle_L_move_direction
+    paddle_L_move_direction = 0
+
+
+def R_off():
+    global paddle_R_move_direction
+    paddle_R_move_direction = 0
+
+
+screen.onkeypress(L_up, "w")
+screen.onkeypress(L_down, "s")
+screen.onkeypress(R_up, "Up")
+screen.onkeypress(R_down, "Down")
+screen.onkeyrelease(L_off, "w")
+screen.onkeyrelease(L_off, "s")
+screen.onkeyrelease(R_off, "Up")
+screen.onkeyrelease(R_off, "Down")
+screen.listen()
+
 
 # Score
 score = Turtle()
@@ -63,6 +121,7 @@ score.penup()
 score_L = 0
 score_R = 0
 
+
 def write_score():
     score.clear()
     score.goto(-screen.window_width() / 4, screen.window_height() / 2 - 80)
@@ -70,35 +129,49 @@ def write_score():
     score.goto(screen.window_width() / 4, screen.window_height() / 2 - 80)
     score.write(score_R, align="center", font=("Arial", 32, "bold"))
 
-write_score()
 
-screen.tracer()
+def check_if_someone_scores():
+    global score_L, score_R
+    if (ball.xcor() + ball_radius) >= play_right:  # right of ball at right of field
+        score_L += 1
+        write_score()
+        reset_ball()
+    elif play_left >= (ball.xcor() - ball_radius):  # left of ball at left of field
+        score_R += 1
+        write_score()
+        reset_ball()
 
-def frame():
-    check_if_someone_scores()
-    update_paddle_positions()
-    update_ball_position()
-    screen.update()
-    screen.ontimer(frame, framerate_ms)
+# BALL
+ball = Turtle()
 
-# Start the game
-framerate_ms = 40
-frame()
+ball.penup()
+ball.shape("circle")
+ball.shapesize(0.5, 0.5)
+
+ball_radius = 10 * 0.5
 
 # ball_movement speed
 ball_move_xaxis = 3     #speed of ball in horizontally
 ball_move_yaxis = 2     #speed of ball in vertically
 
+def ball_collides_with_paddle(paddle):
+    x_distance = abs(paddle.xcor() - ball.xcor())
+    y_distance = abs(paddle.ycor() - ball.ycor())
+    overlap_horizontally = (ball_radius + paddle_w_half >= x_distance)
+    overlap_vertically = (ball_radius + paddle_h_half >= y_distance)
+    return overlap_horizontally and overlap_vertically   # returns either true or false
+
+
 def update_ball_position():
     global ball_move_xaxis, ball_move_yaxis
-
-    if ball.ycor()+ball_radius >= play_top:
+    if ball.ycor() + ball_radius >= play_top:  # top of ball at or above top of field
         ball_move_yaxis *= -1
-    if ball.ycor()-ball_radius <= play_bottom:
+    elif play_bottom >= ball.ycor() - ball_radius:  # bottom of ball at or below bottom of field
         ball_move_yaxis *= -1
-
+    if ball_collides_with_paddle(R) or ball_collides_with_paddle(L):
+        ball_move_xaxis *= -1
     ball.setx(ball.xcor() + ball_move_xaxis)
-    ball.sety(ball.ycor() + ball_move_xaxis)
+    ball.sety(ball.ycor() + ball_move_yaxis)
 
 def reset_ball():
     global ball_move_xaxis, ball_move_yaxis
@@ -119,16 +192,17 @@ def reset_ball():
     ball_move_xaxis = direction_horiz * speed_horiz
     ball_move_yaxis = direction_vert * speed_vert
 
-def check_if_someone_scores():
-    global score_L, score_R
-    if ball.xcor()+ball_radius > play_right:
-        score_L += 1
-        write_score()
-        reset_ball()
-    if ball.xcor()+ball_radius > play_left:
-        score_R += 1
-        write_score()
-        reset_ball()
 
-def update_paddle_positions():
-    pass
+# Frames
+def frame():
+    check_if_someone_scores()
+    update_paddle_positions()
+    update_ball_position()
+    screen.update()
+    screen.ontimer(frame, framerate_ms)
+
+
+# Start the game
+write_score()
+framerate_ms = 4
+frame()
