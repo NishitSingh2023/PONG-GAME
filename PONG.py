@@ -31,11 +31,6 @@ area.pensize(5)
 area.pencolor('red')
 area.goto(play_left, play_top)
 
-'''area.pensize(5)
-area.pencolor('black')
-area.
-'''
-
 # Paddles
 L = Turtle()
 R = Turtle()
