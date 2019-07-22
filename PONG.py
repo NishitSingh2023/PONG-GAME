@@ -18,12 +18,23 @@ area.hideturtle()
 
 area.penup()
 area.goto(play_left, play_top)
+area.pensize(5)
 area.pendown()
 area.goto(play_right, play_top)
+area.pensize(5)
+area.pencolor('red')
 area.goto(play_right, play_bottom)
+area.pensize(5)
+area.pencolor('black')
 area.goto(play_left, play_bottom)
+area.pensize(5)
+area.pencolor('red')
 area.goto(play_left, play_top)
 
+'''area.pensize(5)
+area.pencolor('black')
+area.
+'''
 
 # Paddles
 L = Turtle()
@@ -52,23 +63,22 @@ R.setx(play_right - 10)
 paddle_L_move_direction = 0
 paddle_R_move_direction = 0
 
-paddle_move_vert = 4
+paddle_move_vert = 6
 
 
-'''def paddle_is_allowed_to_move_here(new_y_pos):
-    if play_bottom > new_y_pos - paddle_h_half:
+def paddle_is_allowed_to_move_here(new_pos):
+    if play_bottom > new_pos - paddle_h_half:
         return False
-    if new_y_pos + paddle_h_half > play_top:
+    if play_top < new_pos + paddle_h_half:
         return False
     return True
-'''
 
 def update_paddle_positions():
     L_new_y_pos = L.ycor() + (paddle_L_move_direction * paddle_move_vert)
     R_new_y_pos = R.ycor() + (paddle_R_move_direction * paddle_move_vert)
-    #if paddle_is_allowed_to_move_here(L_new_y_pos):
+    if paddle_is_allowed_to_move_here(L_new_y_pos):
         L.sety(L_new_y_pos)
-    #if paddle_is_allowed_to_move_here(R_new_y_pos):
+    if paddle_is_allowed_to_move_here(R_new_y_pos):
         R.sety(R_new_y_pos)
 
 
@@ -151,8 +161,8 @@ ball.shapesize(0.5, 0.5)
 ball_radius = 10 * 0.5
 
 # ball_movement speed
-ball_move_xaxis = 3     #speed of ball in horizontally
-ball_move_yaxis = 2     #speed of ball in vertically
+ball_move_xaxis = 9     #speed of ball in horizontally
+ball_move_yaxis = 6     #speed of ball in vertically
 
 def ball_collides_with_paddle(paddle):
     x_distance = abs(paddle.xcor() - ball.xcor())
@@ -178,8 +188,8 @@ def reset_ball():
 
     ball.setpos(0, 0)
 
-    speed_horiz = randint(2, 4)
-    speed_vert = randint(2, 4)
+    speed_horiz = randint(5, 8)
+    speed_vert = randint(5, 8)
 
     direction_horiz = 1
     direction_vert = 1
@@ -204,5 +214,5 @@ def frame():
 
 # Start the game
 write_score()
-framerate_ms = 4
+framerate_ms = 40
 frame()
