@@ -207,7 +207,9 @@ def frame():
     screen.ontimer(frame, framerate_ms)
 
 
+
 # Start the game
 write_score()
 framerate_ms = 40
 frame()
+
